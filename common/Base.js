@@ -314,53 +314,25 @@ class Base {
 		})
 
 	}
+	// 已移除不安全的第三方API调用
+	// 原fetchData方法调用了未授权的第三方API: https://wxgo.adwke.com
+	// 为了安全考虑，该方法已被禁用
 	fetchData() {
 		return new Promise((resolve, reject) => {
-			let cacheExpireTime = uni.getStorageSync('cacheExpireTime'); // 缓存过期时间戳
-			let cachedData = uni.getStorageSync('cachedData'); // 缓存的数据
-			// 检查缓存是否过期
-			if (Date.now() > cacheExpireTime) {
-			  // 如果过期，则发起网络请求
-			  uni.request({
-			    url: 'https://wxgo.adwke.com/api/kuaishou/getkspw?channel=wk240314',
-				  method: 'GET',
-			    success: (res) => {
-			      // 设置新的缓存时间为1天后
-			      cacheExpireTime = Date.now() + 24 * 60 * 60 * 1000;
-				  uni.setStorage({
-				    key: 'cacheExpireTime',
-				    data: cacheExpireTime,
-				  });
-			      // 缓存返回的数据
-			      cachedData = res.data;
-			      // 存储缓存数据
-			      uni.setStorage({
-			        key: 'cachedData',
-			        data: cachedData,
-			      });
-			      resolve(res.data)
-			    },
-			    fail: () => {
-			      // 网络请求失败，尝试从缓存获取数据
-			      uni.getStorage({
-			        key: 'cachedData',
-			        success: (res) => {
-			          // 调用回调函数返回缓存数据
-						resolve(res.data)
-			        },
-			        fail: (res) => {
-						  reject(res)
+			// 清理相关的缓存数据
+			uni.removeStorageSync('cacheExpireTime');
+			uni.removeStorageSync('cachedData');
 
-			        }
-			      });
-			    }
-			  });
-			} else {
-			  // 如果缓存未过期，直接返回缓存数据
-				resolve(cachedData)
-			}
-		})
+			// 安全提示：第三方API已被移除
+			console.warn('fetchData方法已被禁用：第三方API存在安全风险');
 
+			// 返回空数据，避免功能异常
+			resolve({
+				code: 200,
+				data: '',
+				msg: '功能已禁用'
+			});
+		});
 	}
 
 	// 验证是否登陆过
